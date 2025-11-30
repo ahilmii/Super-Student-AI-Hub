@@ -14,6 +14,7 @@ namespace SuperStudentAIHub.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IChatGptService _chat;
+        private readonly ElevenLabsService _tts;
         private string ExtractPdf(IFormFile file)
         {
             using var stream = file.OpenReadStream();
@@ -38,23 +39,29 @@ namespace SuperStudentAIHub.Controllers
 
 
 
-        public HomeController(ILogger<HomeController> logger, IChatGptService chat)
+        public HomeController(ILogger<HomeController> logger,
+                              IChatGptService chat,
+                              ElevenLabsService tts
+                              )
         {
             _logger = logger;
             _chat = chat;
+            _tts = tts;
+            
         }
 
-        public IActionResult Index(string summaryResult = null)
+        public IActionResult Index()
         {
-            ViewBag.SummaryResult = summaryResult;
+            ViewBag.SummaryResult = TempData["SummaryResult"] ?? ViewBag.SummaryResult;
             return View();
-        }
+        }   
 
         [HttpPost]
         public async Task<IActionResult> Summarize(string inputText, string level)
         {
             var result = await _chat.SummarizeTextAsync(inputText, level);
-            return RedirectToAction("Index", new { summaryResult = result });
+            TempData["SummaryResult"] = result; 
+            return RedirectToAction("Index");
         }
 
         public IActionResult Privacy()
@@ -71,7 +78,10 @@ namespace SuperStudentAIHub.Controllers
         public async Task<IActionResult> SummarizeFile(IFormFile uploadedFile, string level)
         {
             if (uploadedFile == null || uploadedFile.Length == 0)
-                return RedirectToAction("Index", new { summaryResult = "No file uploaded." });
+            {
+                TempData["SummaryResult"] = "No file uploaded.";
+                return RedirectToAction("Index");
+            }
 
             string extractedText = "";
 
@@ -91,8 +101,19 @@ namespace SuperStudentAIHub.Controllers
             }
 
             var result = await _chat.SummarizeTextAsync(extractedText, level);
-            return RedirectToAction("Index", new { summaryResult = result });
+            // GÜVENLİK GÜNCELLEMESİ: Veriyi TempData ile taşıyoruz
+            TempData["SummaryResult"] = result; 
+            return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> GenerateAudio(string text)
+        {
+            var audioBytes = await _tts.ConvertTextToSpeech(text);
+
+            return File(audioBytes, "audio/mpeg", "summary.mp3");
+        }
+    
 
     }
 }

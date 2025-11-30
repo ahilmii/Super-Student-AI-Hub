@@ -1,5 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Super Student AI Hub";
+    // YENİ EKLEME: Özet sonucunu öncelikle TempData'dan okur, yoksa ViewBag'e bakar.
+    var summary = TempData["SummaryResult"] as string ?? ViewBag.SummaryResult as string;
 }
 
 <h1>Super Student AI Hub</h1>
@@ -20,13 +22,16 @@
     <button type="submit" class="btn btn-primary">Özetle</button>
 </form>
 
-@if (ViewBag.SummaryResult != null)
+<hr />
+
+@if (!string.IsNullOrEmpty(summary)) // ViewBag.SummaryResult yerine 'summary' değişkenini kullanıyoruz
 {
-    <hr />
     <h3>Özet Sonucu:</h3>
     <div style="white-space:pre-wrap; border:1px solid #ccc; padding:10px; border-radius:6px;">
-        @ViewBag.SummaryResult
+        <div id="summaryText">@summary</div> 
     </div>
+
+    <hr />
 }
 
 <form asp-action="SummarizeFile" method="post" enctype="multipart/form-data">
@@ -45,3 +50,11 @@
     <br /><br />
     <button type="submit" class="btn btn-primary">Özetle (Dosya)</button>
 </form>
+
+<form method="post" asp-controller="Home" asp-action="GenerateAudio">
+    <textarea name="text" class="form-control" rows="4">@summary</textarea>
+    <button type="submit" class="btn btn-primary mt-2">Seslendir</button>
+</form>
+
+
+
