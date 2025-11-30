@@ -1,18 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using SuperStudentAIHub.Services;
 using System.Threading.Tasks;
+using System; 
 
 namespace SuperStudentAIHub.Controllers
 {
     public class VisualsController : Controller
     {
-        private readonly IChatGptService _chatService;
-        private readonly IImageService _imageService;
+        // ALAN TANIMLARI
+        private readonly ISchematicService _schematicService; 
+        private readonly IImageService _imageService; 
 
-        // Inject both the Chat Service (for Schematics) and Image Service (for Visuals)
-        public VisualsController(IChatGptService chatService, IImageService imageService)
+        // Constructor
+        public VisualsController(ISchematicService schematicService, IImageService imageService)
         {
-            _chatService = chatService;
+            _schematicService = schematicService;
             _imageService = imageService;
         }
 
@@ -26,9 +28,9 @@ namespace SuperStudentAIHub.Controllers
         [HttpPost]
         public async Task<IActionResult> Generate(string inputText, string visualType)
         {
-            // 1. Pass the user's selection back to the View
+            // Veri aktarımı ve boş kontrolü aynı kalır
             ViewBag.InputText = inputText;
-            ViewBag.SelectedVisualType = visualType; // <--- NEW: Remember the selection
+            ViewBag.SelectedVisualType = visualType; 
 
             if (string.IsNullOrWhiteSpace(inputText))
             {
@@ -38,24 +40,23 @@ namespace SuperStudentAIHub.Controllers
 
             if (visualType == "schematic")
             {
-                // Generate Mermaid.js Code
-                string mermaidCode = await _chatService.GenerateSchematicAsync(inputText);
+                // METHOD ADI DÜZELTİLDİ: GenerateSchematicAsync yerine GenerateMermaidCode
+                string mermaidCode = await _schematicService.GenerateMermaidCode(inputText); 
+                
                 ViewBag.ResultType = "schematic";
                 ViewBag.SchematicCode = mermaidCode;
             }
             else if (visualType == "image")
             {
+                // ARKADAŞINIZIN KISMI: DEĞİŞMEDİ
                 try
                 {
-                    // Generate Image
                     string imageUrl = await _imageService.GenerateImageUrl(inputText);
                     ViewBag.ResultType = "image";
                     ViewBag.ImageUrl = imageUrl;
                 }
                 catch (Exception ex)
                 {
-                    // 2. Capture the actual error message
-                    // This often happens if the API Key is missing or invalid
                     ViewBag.Error = $"Image generation failed: {ex.Message}";
                 }
             }
