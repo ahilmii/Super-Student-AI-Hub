@@ -46,5 +46,36 @@ namespace SuperStudentAIHub.Services
 
             return jsonResult.choices[0].message.content.ToString();
         }
+
+        // Add this method inside your ChatGptService class
+
+        public async Task<string> GenerateSchematicAsync(string text)
+        {
+            // We explicitly ask for Mermaid.js syntax and tell it to avoid Markdown formatting
+            var prompt =
+                $"Analyze the following text and generate a Mermaid.js diagram (graph TD, sequenceDiagram, or mindmap) that best represents the structure or concepts. " +
+                $"Return ONLY the raw mermaid code string. Do not use markdown code blocks (```mermaid). Do not add explanations.\n\nText:\n{text}";
+
+            var body = new
+            {
+                model = "gpt-4o-mini",
+                messages = new[]
+                {
+            new { role = "user", content = prompt }
+        }
+            };
+
+            var json = JsonConvert.SerializeObject(body);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _http.PostAsync("[https://api.openai.com/v1/chat/completions](https://api.openai.com/v1/chat/completions)", content);
+            var result = await response.Content.ReadAsStringAsync();
+
+            dynamic jsonResult = JsonConvert.DeserializeObject(result);
+            string output = jsonResult.choices[0].message.content.ToString();
+
+            // Cleanup: sometimes AI adds backticks anyway, so we remove them just in case
+            return output.Replace("```mermaid", "").Replace("```", "").Trim();
+        }
     }
 }

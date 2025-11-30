@@ -44,7 +44,7 @@ namespace SuperStudentAIHub.Controllers
             _chat = chat;
         }
 
-        public IActionResult Index(string summaryResult = null)
+        public IActionResult Index(string? summaryResult = null)
         {
             ViewBag.SummaryResult = summaryResult;
             return View();
