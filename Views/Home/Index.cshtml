@@ -24,37 +24,44 @@
 
 <hr />
 
-@if (!string.IsNullOrEmpty(summary)) // ViewBag.SummaryResult yerine 'summary' değişkenini kullanıyoruz
+@if (!string.IsNullOrEmpty(summary))
 {
     <h3>Özet Sonucu:</h3>
-    <div style="white-space:pre-wrap; border:1px solid #ccc; padding:10px; border-radius:6px;">
+    <div style="white-space:pre-wrap; border:1px solid #ccc; padding:10px; border-radius:6px; margin-bottom: 20px;">
         <div id="summaryText">@summary</div> 
     </div>
+    
+    @if (ViewBag.AudioData != null)
+    {
+        <div class="alert alert-success">
+            <strong>Ses Hazır!</strong> Aşağıdan dinleyebilirsin:
+            <br /><br />
+            <audio controls autoplay style="width: 100%;">
+                <source src="@ViewBag.AudioData" type="audio/mpeg" />
+                Tarayıcınız ses elementini desteklemiyor.
+            </audio>
+        </div>
+    }
 
     <hr />
+
+    <form asp-controller="Home" asp-action="GenerateAudio" method="post">
+        <input type="hidden" name="text" value="@summary" />
+        <button type="submit" class="btn btn-success">🔊 Bu Özeti Seslendir</button>
+    </form>
 }
+
+<hr />
 
 <form asp-action="SummarizeFile" method="post" enctype="multipart/form-data">
     <h3>PDF / Word Dosyası Yükle</h3>
-
     <input type="file" name="uploadedFile" accept=".pdf,.docx" />
-
     <br /><br />
-
     <select name="level" style="width:200px;">
         <option value="short">Short Summary</option>
         <option value="medium">Medium Summary</option>
         <option value="long">Long Summary</option>
     </select>
-
     <br /><br />
     <button type="submit" class="btn btn-primary">Özetle (Dosya)</button>
 </form>
-
-<form method="post" asp-controller="Home" asp-action="GenerateAudio">
-    <textarea name="text" class="form-control" rows="4">@summary</textarea>
-    <button type="submit" class="btn btn-primary mt-2">Seslendir</button>
-</form>
-
-
-

@@ -110,10 +110,21 @@ namespace SuperStudentAIHub.Controllers
         [HttpPost]
         public async Task<IActionResult> GenerateAudio(string text)
         {
-            var audioBytes = await _tts.ConvertTextToSpeech(text);
+        // Sesi ElevenLabs'tan alıyoruz
+        var audioBytes = await _tts.ConvertTextToSpeech(text);
 
-            return File(audioBytes, "audio/mpeg", "summary.mp3");
-        }
+        // Byte dizisini Base64 string'e çeviriyoruz (Web sayfasında oynatmak için)
+        var base64Audio = Convert.ToBase64String(audioBytes);
+
+        // Ses verisini View'a taşıyoruz
+        ViewBag.AudioData = $"data:audio/mp3;base64,{base64Audio}";
+
+        // Özeti ekranda tutmak için tekrar gönderiyoruz (Yoksa sayfa yenilenince kaybolur)
+        ViewBag.SummaryResult = text; 
+        TempData["SummaryResult"] = text; // TempData'yı da güncelleyelim
+
+        return View("Index");
+        }  
     
 
     }
