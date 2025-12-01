@@ -50,7 +50,8 @@ namespace SuperStudentAIHub.Controllers
             
         }
 
-        public IActionResult Index()
+        
+        public IActionResult Index(string? summaryResult = null)
         {
             ViewBag.SummaryResult = TempData["SummaryResult"] ?? ViewBag.SummaryResult;
             return View();
