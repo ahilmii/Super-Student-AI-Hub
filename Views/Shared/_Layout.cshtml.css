@@ -39,10 +39,38 @@ button.accept-policy {
   line-height: inherit;
 }
 
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
-}
+ .custom-footer {
+        width: 100%;
+        padding: 20px 0;
+        text-align: center;
+        margin-top: 80px;
+        background: transparent;
+    }
+
+    .footer-content {
+        color: #f0f0f0;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        align-items: center;
+        opacity: 0.85;
+    }
+
+    .brand {
+        font-weight: 600;
+        color: #ffffff;
+        letter-spacing: 0.3px;
+    }
+
+    .footer-link {
+        color: #ffffff;
+        opacity: 0.9;
+        text-decoration: underline;
+        transition: 0.2s ease;
+    }
+
+    .footer-link:hover {
+        opacity: 1;
+        text-decoration: none;
+    }

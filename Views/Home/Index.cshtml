@@ -1,67 +1,124 @@
 ﻿@{
-    ViewData["Title"] = "Super Student AI Hub";
-    // YENİ EKLEME: Özet sonucunu öncelikle TempData'dan okur, yoksa ViewBag'e bakar.
     var summary = TempData["SummaryResult"] as string ?? ViewBag.SummaryResult as string;
 }
-
-<h1>Super Student AI Hub</h1>
-<p>Ders Notu Özetleme Modülü (ChatGPT)</p>
-
-<form asp-action="Summarize" method="post">
-    <textarea name="inputText" rows="7" style="width:100%;" placeholder="Metni buraya yapıştır"></textarea>
-
-    <br /><br />
-
-    <select name="level" style="width:200px;">
-        <option value="kısa">Kısa Özet</option>
-        <option value="orta">Orta Özet</option>
-        <option value="uzun">Uzun Özet</option>
-    </select>
-
-    <br /><br />
-    <button type="submit" class="btn btn-primary">Özetle</button>
-</form>
-
-<hr />
-
-@if (!string.IsNullOrEmpty(summary))
-{
-    <h3>Özet Sonucu:</h3>
-    <div style="white-space:pre-wrap; border:1px solid #ccc; padding:10px; border-radius:6px; margin-bottom: 20px;">
-        <div id="summaryText">@summary</div> 
-    </div>
-    
-    @if (ViewBag.AudioData != null)
-    {
-        <div class="alert alert-success">
-            <strong>Ses Hazır!</strong> Aşağıdan dinleyebilirsin:
-            <br /><br />
-            <audio controls autoplay style="width: 100%;">
-                <source src="@ViewBag.AudioData" type="audio/mpeg" />
-                Tarayıcınız ses elementini desteklemiyor.
-            </audio>
+<div class="container">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <img src="~/images/Logo.png" alt="SuperStudentAIHub Logo" class="navbar-logo" />
+                SuperStudentAIHub
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" asp-controller="Home" asp-action="Index">🏠 Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Visuals" asp-action="Index">🎨AI Visuals</a>
+                    </li>
+                </ul>
+            </div>
         </div>
+    </nav>
+
+    <div class="main-content">
+        <h1>AI Study Assistant</h1>
+        <p class="subtitle">Summarize your PDFs and texts with artificial intelligence</p>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('chat')">💬 Note Summarization</button>
+            <button class="tab" onclick="switchTab('document')">📄 PDF/Word Upload</button>
+        </div>
+
+        <!-- Chat Tab -->
+        <div id="chat-tab" class="tab-content active">
+            <form asp-action="Summarize" method="post">
+                <div class="form-group">
+                    <label for="inputText">Paste your text here</label>
+                    <textarea name="inputText" id="inputText" placeholder="Paste the lecture notes, article, or text you want to summarize here..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="level">Summary Type</label>
+                    <select name="level" id="level">
+                        <option value="short">Short Summary</option>
+                        <option value="medium">Medium Summary</option>
+                        <option value="long">Long Summary</option> 
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">✨ Summarize</button>
+            </form>
+        </div>
+
+        <!-- Document Tab -->
+        <div id="document-tab" class="tab-content">
+            <form asp-action="SummarizeFile" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Upload File (PDF, Word)</label>
+                    <input type="file" name="uploadedFile" accept=".pdf,.docx,.doc" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="fileLevel">Summary Type</label>
+                    <select name="level" id="fileLevel">
+                        <option value="short">Short Summary</option>
+                        <option value="medium">Medium Summary</option>
+                        <option value="long">Long Summary</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">📄 Summarize File</button>
+            </form>
+        </div>
+
+        @if (!string.IsNullOrEmpty(summary))
+        {
+            <hr />
+
+            <div class="results">
+                <h3>📋 Summary Result</h3>
+                <div class="results-content" id="summaryText">@summary</div>
+
+                @if (ViewBag.AudioData != null)
+                {
+                    <div class="audio-section">
+                        <strong>🔊 Audio Ready!</strong> You can listen below:
+                        <audio controls autoplay>
+                            <source src="@ViewBag.AudioData" type="audio/mpeg" />
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                }
+
+                <form asp-controller="Home" asp-action="GenerateAudio" method="post" style="margin-top: 20px;">
+                    <input type="hidden" name="text" value="@summary" />
+                    <button type="submit" class="btn btn-success">🔊 Text to Speech</button>
+                </form>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function switchTab(tab) {
+        // Update tab buttons
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Update tab content
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(c => c.classList.remove('active'));
+
+        if (tab === 'chat') {
+            document.getElementById('chat-tab').classList.add('active');
+        } else {
+            document.getElementById('document-tab').classList.add('active');
+        }
     }
-
-    <hr />
-
-    <form asp-controller="Home" asp-action="GenerateAudio" method="post">
-        <input type="hidden" name="text" value="@summary" />
-        <button type="submit" class="btn btn-success">🔊 Bu Özeti Seslendir</button>
-    </form>
-}
-
-<hr />
-
-<form asp-action="SummarizeFile" method="post" enctype="multipart/form-data">
-    <h3>PDF / Word Dosyası Yükle</h3>
-    <input type="file" name="uploadedFile" accept=".pdf,.docx" />
-    <br /><br />
-    <select name="level" style="width:200px;">
-        <option value="short">Short Summary</option>
-        <option value="medium">Medium Summary</option>
-        <option value="long">Long Summary</option>
-    </select>
-    <br /><br />
-    <button type="submit" class="btn btn-primary">Özetle (Dosya)</button>
-</form>
+</script>
