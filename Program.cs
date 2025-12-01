@@ -4,6 +4,8 @@ using SuperStudentAIHub.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton<ElevenLabsService>();
+
 // 1. HOME CONTROLLER için GEREKLİ OLAN ESKİ KAYDI GERİ GETİRME
 // Bu kayıt, HomeController'ın IChatGptService bağımlılığını çözer.
 builder.Services.AddSingleton<IChatGptService, ChatGptService>(); 
