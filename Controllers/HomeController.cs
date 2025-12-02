@@ -47,21 +47,21 @@ namespace SuperStudentAIHub.Controllers
             _logger = logger;
             _chat = chat;
             _tts = tts;
-            
+
         }
 
-        
+
         public IActionResult Index(string? summaryResult = null)
         {
             ViewBag.SummaryResult = TempData["SummaryResult"] ?? ViewBag.SummaryResult;
             return View();
-        }   
+        }
 
         [HttpPost]
         public async Task<IActionResult> Summarize(string inputText, string level)
         {
             var result = await _chat.SummarizeTextAsync(inputText, level);
-            TempData["SummaryResult"] = result; 
+            TempData["SummaryResult"] = result;
             return RedirectToAction("Index");
         }
 
@@ -103,29 +103,29 @@ namespace SuperStudentAIHub.Controllers
 
             var result = await _chat.SummarizeTextAsync(extractedText, level);
             // GÜVENLİK GÜNCELLEMESİ: Veriyi TempData ile taşıyoruz
-            TempData["SummaryResult"] = result; 
+            TempData["SummaryResult"] = result;
             return RedirectToAction("Index");
         }
 
         [HttpPost]
         public async Task<IActionResult> GenerateAudio(string text)
         {
-        // Sesi ElevenLabs'tan alıyoruz
-        var audioBytes = await _tts.ConvertTextToSpeech(text);
+            // Sesi ElevenLabs'tan alıyoruz
+            var audioBytes = await _tts.ConvertTextToSpeech(text);
 
-        // Byte dizisini Base64 string'e çeviriyoruz (Web sayfasında oynatmak için)
-        var base64Audio = Convert.ToBase64String(audioBytes);
+            // Byte dizisini Base64 string'e çeviriyoruz (Web sayfasında oynatmak için)
+            var base64Audio = Convert.ToBase64String(audioBytes);
 
-        // Ses verisini View'a taşıyoruz
-        ViewBag.AudioData = $"data:audio/mp3;base64,{base64Audio}";
+            // Ses verisini View'a taşıyoruz
+            ViewBag.AudioData = $"data:audio/mp3;base64,{base64Audio}";
 
-        // Özeti ekranda tutmak için tekrar gönderiyoruz (Yoksa sayfa yenilenince kaybolur)
-        ViewBag.SummaryResult = text; 
-        TempData["SummaryResult"] = text; // TempData'yı da güncelleyelim
+            // Özeti ekranda tutmak için tekrar gönderiyoruz (Yoksa sayfa yenilenince kaybolur)
+            ViewBag.SummaryResult = text;
+            TempData["SummaryResult"] = text; // TempData'yı da güncelleyelim
 
-        return View("Index");
-        }  
-    
+            return View("Index");
+        }
+
 
     }
 }
